@@ -15,7 +15,7 @@ import {
   EIP1193RequestFn,
   TransportConfig,
 } from 'viem'
-import { goerli } from 'viem/chains'
+import { goerli, mainnet } from 'viem/chains'
 import 'viem/window'
 import { wagmiContract } from './contracts/contract'
 
@@ -39,6 +39,48 @@ export default function Home() {
     setAccount(address)
   }
 
+  const mint = async () => {
+    if (!account) return
+    const { request } = await publicClient.simulateContract({
+      account,
+      address: "0xd9145CCE52D386f254917e481eB44e9943F39138",
+      abi: [
+        {
+          "inputs": [],
+          "name": "retrieve",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "num",
+              "type": "uint256"
+            }
+          ],
+          "name": "store",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+      functionName: "store",
+      args: [BigInt(2)],
+      gas: BigInt(69420), 
+    })
+    const hash = await walletClient.writeContract(request)
+    setHash(hash)
+    console.log({ hash })
+  }
+
   useEffect(() =>{
     connect()
   }, [])
@@ -47,7 +89,7 @@ export default function Home() {
     return (
       <>
         <div>Connected: {account}</div>
-        <button>Mint</button>
+        <button onClick={mint}>Mint</button>
         {receipt && (
           <>
             <div>
